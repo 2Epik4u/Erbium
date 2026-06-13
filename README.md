@@ -1,4 +1,4 @@
-# Erbium
+# Erbiumx
 
 Erbium is a WIP universal gameserver for Fortnite.
 
