@@ -94,7 +94,7 @@ void Client::Init()
 
         TArray<FUIExtension> ArenaExtensions, ShowdownExtensions;
 
-        FUIExtension ArenaUIExtension {};
+        FUIExtension ArenaUIExtension{};
         ArenaUIExtension.Slot = PrimarySlot;
         if (VersionInfo.FortniteVersion < 23)
             ArenaUIExtension.WidgetClass.ObjectID.AssetPathName = FName(L"/Game/UI/Competitive/Arena/ArenaScoringHUD.ArenaScoringHUD_C");
@@ -109,7 +109,7 @@ void Client::Init()
             SubPathString = FString();
         }
 
-        FUIExtension ShowdownUIExtension {};
+        FUIExtension ShowdownUIExtension{};
         ShowdownUIExtension.Slot = PrimarySlot;
         if (VersionInfo.FortniteVersion < 23)
             ShowdownUIExtension.WidgetClass.ObjectID.AssetPathName = FName(L"/Game/UI/Frontend/Showdown/ShowdownScoringHUD.ShowdownScoringHUD_C");
@@ -153,7 +153,7 @@ void Client::Init()
                     Playlist->RespawnType = 1; // InfiniteRespawnExceptStorm
                     if (Playlist->HasbAllowJoinInProgress())
                         Playlist->bAllowJoinInProgress = true;
-                    //if (Playlist->HasbForceRespawnLocationInsideOfVolume())
+                    // if (Playlist->HasbForceRespawnLocationInsideOfVolume())
                     //	Playlist->bForceRespawnLocationInsideOfVolume = true;
                     if (Playlist->HasbForceCameraFadeOnRespawn())
                         Playlist->bForceCameraFadeOnRespawn = true;
@@ -236,16 +236,16 @@ void Client::Init()
 
         CompleteBuildingEditInteraction = (void (*)(void*))Memcury::Scanner(CompleteBuildingEditInteractionLea).RelativeOffset(3).Get();
 
-        MH_Initialize();
+        //MH_Initialize();
 
         if (VersionInfo.FortniteVersion < 11)
-            Utils::Hook(SelectEditAddr, SelectEdit, SelectEditOG);
+            Hooking::Hook(SelectEditAddr, SelectEdit, SelectEditOG);
         if (VersionInfo.FortniteVersion < 15.20)
-            Utils::Hook(PerformBuildingEditInteractionAddr, PerformBuildingEditInteraction, PerformBuildingEditInteractionOG);
+            Hooking::Hook(PerformBuildingEditInteractionAddr, PerformBuildingEditInteraction, PerformBuildingEditInteractionOG);
         if (VersionInfo.FortniteVersion < 24.30)
-            Utils::Hook(SelectResetAddr, SelectReset, SelectResetOG);
+            Hooking::Hook(SelectResetAddr, SelectReset, SelectResetOG);
 
-        MH_EnableHook(MH_ALL_HOOKS);
+        //MH_EnableHook(MH_ALL_HOOKS);
     }
 
     CreateThread(0, 0, (LPTHREAD_START_ROUTINE)ClientThread, 0, 0, 0);

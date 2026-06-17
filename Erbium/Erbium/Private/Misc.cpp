@@ -81,7 +81,7 @@ public:
 
 void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
 {
-    Memcury::PE::Address add { nullptr };
+    Memcury::PE::Address add{ nullptr };
 
     const auto sizeOfImage = Memcury::PE::GetNTHeaders()->OptionalHeader.SizeOfImage;
     const auto scanBytes = reinterpret_cast<std::uint8_t*>(Memcury::PE::GetModuleBase());
@@ -98,9 +98,9 @@ void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
 
                 for (auto j = 0; j > -0x100000; j--) // so we find everything. no func is actually 1mb
                 {
-                    if ((scanBytes[i + j] & 0xF8) == 0x48 && ((scanBytes[i + j + 1] & 0xFC) == 0x80 || (scanBytes[i + j + 1] & 0xF8) == 0x38)
-                        && (scanBytes[i + j + 2] & 0xF0) != 0xC0 && (scanBytes[i + j + 2] & 0xF0) != 0xE0 && scanBytes[i + j + 2] != 0x65 && scanBytes[i + j + 2] != 0xBB
-                        && scanBytes[i + j + 3] == 0x38 && ((scanBytes[i + j + 1] & 0xFC) != 0x80 || scanBytes[i + j + 4] == 0x0))
+                    if ((scanBytes[i + j] & 0xF8) == 0x48 && ((scanBytes[i + j + 1] & 0xFC) == 0x80 || (scanBytes[i + j + 1] & 0xF8) == 0x38) && (scanBytes[i + j + 2] & 0xF0) != 0xC0 &&
+                        (scanBytes[i + j + 2] & 0xF0) != 0xE0 && scanBytes[i + j + 2] != 0x65 && scanBytes[i + j + 2] != 0xBB && scanBytes[i + j + 3] == 0x38 &&
+                        ((scanBytes[i + j + 1] & 0xFC) != 0x80 || scanBytes[i + j + 4] == 0x0))
                     {
                         // now, scan for if (NetDriver) return NM_Client;
 
@@ -114,9 +114,9 @@ void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
                                 if (*(uint32_t*)Scuffness != 0xF0 && (scanBytes[i + j + k + 4] != 0xC || scanBytes[i + j + k + 5] != 0xB) && scanBytes[i + j + k + 4] != 0x09)
                                     continue;
 
-                                Utils::Patch<uint16_t>(__int64(&scanBytes[i + j + k]), 0x9090);
+                                Hooking::Patch<uint16_t>(__int64(&scanBytes[i + j + k]), 0x9090);
                                 if ((scanBytes[i + j + 1] & 0xF8) == 0x38)
-                                    Utils::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
+                                    Hooking::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
                                 else if ((scanBytes[i + j + 1] & 0xFC) == 0x80)
                                 {
                                     DWORD og;
@@ -135,13 +135,12 @@ void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
                                 auto Scuffness = __int64(&scanBytes[i + j + k]);
                                 Scuffness = (Scuffness + 2) + *(int8_t*)(Scuffness + 1);
 
-                                if (*(uint32_t*)(Scuffness + 3) != 0xF0 && (*(uint8_t*)(Scuffness + 2) != 0xC || *(uint8_t*)(Scuffness + 3) != 0xB)
-                                    && *(uint8_t*)(Scuffness + 2) != 0x09)
+                                if (*(uint32_t*)(Scuffness + 3) != 0xF0 && (*(uint8_t*)(Scuffness + 2) != 0xC || *(uint8_t*)(Scuffness + 3) != 0xB) && *(uint8_t*)(Scuffness + 2) != 0x09)
                                     continue;
 
-                                Utils::Patch<uint8_t>(__int64(&scanBytes[i + j + k]), 0xeb);
+                                Hooking::Patch<uint8_t>(__int64(&scanBytes[i + j + k]), 0xeb);
                                 if ((scanBytes[i + j + 1] & 0xF8) == 0x38)
-                                    Utils::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
+                                    Hooking::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
                                 else if ((scanBytes[i + j + 1] & 0xFC) == 0x80)
                                 {
                                     DWORD og;
@@ -168,7 +167,7 @@ void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
                                 *(uint16*)(&scanBytes[i + j + k + 4]) = 0x9090;
                                 VirtualProtect(&scanBytes[i + j + k], 6, og, &og);
                                 if ((scanBytes[i + j + 1] & 0xF8) == 0x38)
-                                    Utils::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
+                                    Hooking::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
                                 else if ((scanBytes[i + j + 1] & 0xFC) == 0x80)
                                 {
                                     DWORD og;
@@ -187,13 +186,12 @@ void PatchAllNetModes(uintptr_t AttemptDeriveFromURL)
                                 auto Scuffness = __int64(&scanBytes[i + j + k]);
                                 Scuffness = (Scuffness + 6) + *(int32_t*)(Scuffness + 2);
 
-                                if (*(uint32_t*)(Scuffness + 3) != 0xF0 && (*(uint8_t*)(Scuffness + 2) != 0xC || *(uint8_t*)(Scuffness + 3) != 0xB)
-                                    && *(uint8_t*)(Scuffness + 2) != 0x09)
+                                if (*(uint32_t*)(Scuffness + 3) != 0xF0 && (*(uint8_t*)(Scuffness + 2) != 0xC || *(uint8_t*)(Scuffness + 3) != 0xB) && *(uint8_t*)(Scuffness + 2) != 0x09)
                                     continue;
 
-                                Utils::Patch<uint16_t>(__int64(&scanBytes[i + j + k]), 0xe990);
+                                Hooking::Patch<uint16_t>(__int64(&scanBytes[i + j + k]), 0xe990);
                                 if ((scanBytes[i + j + 1] & 0xF8) == 0x38)
-                                    Utils::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
+                                    Hooking::Patch<uint32_t>(__int64(&scanBytes[i + j]), 0x90909090);
                                 else if ((scanBytes[i + j + 1] & 0xFC) == 0x80)
                                 {
                                     DWORD og;
@@ -272,9 +270,9 @@ public:
 };
 
 void (*TestOG)(AFortLightweightProjectileManager* ProjectileManager, TWeakObjectPtr<AFortPlayerPawnAthena> WeakPawn, TWeakObjectPtr<AFortWeapon> WeakWeapon,
-    TSubclassOf<AFortLightweightProjectileConfig>& ConfigClass, FVector Location, FVector Direction, uint8_t Type, int a8, int a9);
-void Test(AFortLightweightProjectileManager* ProjectileManager, TWeakObjectPtr<AFortPlayerPawnAthena> WeakPawn, TWeakObjectPtr<AFortWeapon> WeakWeapon,
-    TSubclassOf<AFortLightweightProjectileConfig>& ConfigClass, FVector Location, FVector Direction, uint8_t Type, int a8, int a9)
+               TSubclassOf<AFortLightweightProjectileConfig>& ConfigClass, FVector Location, FVector Direction, uint8_t Type, int a8, int a9);
+void Test(AFortLightweightProjectileManager* ProjectileManager, TWeakObjectPtr<AFortPlayerPawnAthena> WeakPawn, TWeakObjectPtr<AFortWeapon> WeakWeapon, TSubclassOf<AFortLightweightProjectileConfig>& ConfigClass,
+          FVector Location, FVector Direction, uint8_t Type, int a8, int a9)
 {
     TestOG(ProjectileManager, WeakPawn, WeakWeapon, ConfigClass, Location, Direction, Type, a8, a9);
 
@@ -434,11 +432,7 @@ public:
 template <typename T>
 std::pair<FName, T*> PickWeighted(UEAllocatedMap<FName, T*>& Map, float (*RandFunc)(float), bool bCheckZero = true)
 {
-    float TotalWeight = std::accumulate(Map.begin(), Map.end(), 0.0f,
-        [&](float acc, std::pair<FName, T*> p)
-        {
-            return acc + p.second->Weight;
-        });
+    float TotalWeight = std::accumulate(Map.begin(), Map.end(), 0.0f, [&](float acc, std::pair<FName, T*> p) { return acc + p.second->Weight; });
     float RandomNumber = RandFunc(TotalWeight);
 
     for (auto& Element : Map)
@@ -470,11 +464,7 @@ void InitializeCosmeticLoadout(UFortAthenaAIBotCustomizationData* BotData, AFort
             if (Val->SetTag.TagName == CosmeticTag)
                 LibraryRowMap[Key] = Val;
 
-        auto LibraryRowPair = PickWeighted(LibraryRowMap,
-            [](float Total)
-            {
-                return ((float)rand() / 32767) * Total;
-            });
+        auto LibraryRowPair = PickWeighted(LibraryRowMap, [](float Total) { return ((float)rand() / 32767) * Total; });
         auto& LibraryRow = LibraryRowPair.second;
 
         OutLoadout.Character = (UAthenaCharacterItemDefinition*)UKismetSystemLibrary::GetObjectFromPrimaryAssetId(LibraryRow->CharacterAssetId);
@@ -535,8 +525,7 @@ void InitializeCosmeticLoadout(UFortAthenaAIBotCustomizationData* BotData, AFort
 
 void Misc::Hook()
 {
-    if (VersionInfo.FortniteVersion == 23.00 || (VersionInfo.FortniteVersion >= 24.30 && VersionInfo.FortniteVersion != 28.30 && VersionInfo.FortniteVersion != 29.40)
-        || VersionInfo.FortniteVersion >= 30)
+    if (VersionInfo.FortniteVersion == 23.00 || (VersionInfo.FortniteVersion >= 24.30 && VersionInfo.FortniteVersion != 28.30 && VersionInfo.FortniteVersion != 29.40) || VersionInfo.FortniteVersion >= 30)
     {
         auto AttemptDeriveFromURL = Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4C 8B C1").Get();
         if (!AttemptDeriveFromURL)
@@ -546,7 +535,7 @@ void Misc::Hook()
         if (!AttemptDeriveFromURL)
             AttemptDeriveFromURL = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4C 8B D1").Get();
 
-        Utils::Hook(AttemptDeriveFromURL, GetNetMode);
+        Hooking::Hook(AttemptDeriveFromURL, GetNetMode);
         PatchAllNetModes(AttemptDeriveFromURL);
     }
     else if (VersionInfo.FortniteVersion >= 28)
@@ -557,16 +546,16 @@ void Misc::Hook()
         if (!AttemptDeriveFromURL)
             AttemptDeriveFromURL = Memcury::Scanner::FindPattern("48 89 5C 24 ? 55 56 57 41 54 41 55 41 56 41 57 48 81 EC ? ? ? ? 4C 8B D1").Get();
 
-        Utils::Hook(AttemptDeriveFromURL, GetNetMode);
+        Hooking::Hook(AttemptDeriveFromURL, GetNetMode);
         PatchAllNetModes(AttemptDeriveFromURL);
 
-        Utils::Hook(FindGetNetMode(), GetNetMode);
+        Hooking::Hook(FindGetNetMode(), GetNetMode);
     }
     else
-        Utils::Hook(FindGetNetMode(), GetNetMode);
+        Hooking::Hook(FindGetNetMode(), GetNetMode);
 
-    Utils::Hook(FindSendRequestNow(), SendRequestNow, SendRequestNowOG);
-    Utils::Hook(FindGetMaxTickRate(), GetMaxTickRate);
+    Hooking::Hook(FindSendRequestNow(), SendRequestNow, SendRequestNowOG);
+    Hooking::Hook(FindGetMaxTickRate(), GetMaxTickRate);
     if (VersionInfo.FortniteVersion >= 17)
     {
         auto pattern = Memcury::Scanner::FindPattern("48 89 5C 24 10 48 89 6C 24 20 56 57 41 54 41 56 41 57 48 81 EC ? ? ? ? 65 48 8B 04 25 ? ? ? ? 4C 8B F9").Get();
@@ -577,18 +566,17 @@ void Misc::Hook()
         if (!pattern)
             pattern = Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 56 57 41 54 41 55 41 56 48 81 EC ? ? ? ? 65 48 8B 04 25").Get();
 
-        Utils::Hook(pattern, CheckCheckpointHeartBeat);
+        Hooking::Hook(pattern, CheckCheckpointHeartBeat);
     }
     if (VersionInfo.EngineVersion < 4.20)
     {
-        auto ApplyHomebaseEffectsOnPlayerSetupAddr
-            = Memcury::Scanner::FindPattern("40 55 53 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 00 4C 8B").Get();
+        auto ApplyHomebaseEffectsOnPlayerSetupAddr = Memcury::Scanner::FindPattern("40 55 53 57 41 54 41 56 41 57 48 8D 6C 24 ? 48 81 EC ? ? ? ? 48 8B 05 ? ? ? ? 48 33 C4 48 89 45 00 4C 8B").Get();
 
-        Utils::Hook(ApplyHomebaseEffectsOnPlayerSetupAddr, ApplyHomebaseEffectsOnPlayerSetup, ApplyHomebaseEffectsOnPlayerSetupOG);
+        Hooking::Hook(ApplyHomebaseEffectsOnPlayerSetupAddr, ApplyHomebaseEffectsOnPlayerSetup, ApplyHomebaseEffectsOnPlayerSetupOG);
     }
     if (VersionInfo.FortniteVersion >= 25 && VersionInfo.FortniteVersion < 28)
     {
-        Utils::Hook(Memcury::Scanner::FindPattern("48 89 5C ? ? 57 48 83 EC ? 48 8B D1 48 85 C9 74 ?").Get(), RetFalse);
+        Hooking::Hook(Memcury::Scanner::FindPattern("48 89 5C ? ? 57 48 83 EC ? 48 8B D1 48 85 C9 74 ?").Get(), RetFalse);
     }
 
     auto PedestalBeginPlay = Memcury::Scanner::FindStringRef(L"AFortTeamMemberPedestal::BeginPlay - Begun play on pedestal %s", true, 0, VersionInfo.EngineVersion >= 5.0).Get();
@@ -618,7 +606,7 @@ void Misc::Hook()
         {
             if (ActorVft[i] == (void*)RealBeginPlay)
             {
-                Utils::Hook<AFortTeamMemberPedestal>(uint32_t(i), AActor::GetDefaultObj()->Vft[i]);
+                Hooking::Hook<AFortTeamMemberPedestal>(uint32_t(i), AActor::GetDefaultObj()->Vft[i]);
                 break;
             }
         }
@@ -628,33 +616,30 @@ void Misc::Hook()
     {
         auto pattern = Memcury::Scanner::FindPattern("48 8B 01 FF 90 ? ? ? ? 48 8B 8B ? ? ? ? 48 85 C9 74 ? 48 8B 01 FF 90 ? ? ? ? 48 8D 8B");
 
-        auto patchPoint = pattern.ScanFor(VersionInfo.EngineVersion < 5.5 ? std::vector<uint8_t> { 0x48, 0x89, 0x5C } : std::vector<uint8_t> { 0x40, 0x53 }, false)
-                              .ScanFor({ 0x83, 0xF8, 0x02 })
-                              .Get();
+        auto patchPoint = pattern.ScanFor(VersionInfo.EngineVersion < 5.5 ? std::vector<uint8_t>{ 0x48, 0x89, 0x5C } : std::vector<uint8_t>{ 0x40, 0x53 }, false).ScanFor({ 0x83, 0xF8, 0x02 }).Get();
 
-        Utils::Patch<uint8_t>(patchPoint + 2, 0x1);
+        Hooking::Patch<uint8_t>(patchPoint + 2, 0x1);
     }
 
     if (VersionInfo.FortniteVersion >= 24.30)
     {
-        auto sig = VersionInfo.EngineVersion == 5.3
-            ? Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B DA 49 8B D0 E8 ? ? ? ? 48 85 C0 0F 85 ? ? ? ? 48 39 83").Get()
-            : Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 4C 8D B1 ? ? ? ? 33 DB 49 8D 7E").Get();
+        auto sig = VersionInfo.EngineVersion == 5.3 ? Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B DA 49 8B D0 E8 ? ? ? ? 48 85 C0 0F 85 ? ? ? ? 48 39 83").Get()
+                                                    : Memcury::Scanner::FindPattern("48 89 5C 24 ? 48 89 6C 24 ? 48 89 74 24 ? 57 41 56 41 57 48 83 EC ? 4C 8D B1 ? ? ? ? 33 DB 49 8D 7E").Get();
 
         if (!sig)
             sig = Memcury::Scanner::FindPattern("40 53 48 83 EC ? 48 8B DA 48 8B D1 48 81 C1 ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 4C 8B 0B 45 33 C0").Get();
 
-        Utils::Hook(sig, CrashSomething, CrashSomethingOG);
+        Hooking::Hook(sig, CrashSomething, CrashSomethingOG);
     }
 
-    // Utils::Hook(ImageBase + 0x1CE85F4, Test);
-    // Utils::Hook(ImageBase + 0x2788BEC, Test, TestOG);
-    // Utils::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ?? 57 48 83 EC ?? 48 8B DA 48 8B F9 E8 ?? ?? ?? ?? 84 C0 75 ?? 48 83 79").Get(), Test2, Test2OG);
+    // Hooking::Hook(ImageBase + 0x1CE85F4, Test);
+    // Hooking::Hook(ImageBase + 0x2788BEC, Test, TestOG);
+    // Hooking::Hook(Memcury::Scanner::FindPattern("48 89 5C 24 ?? 57 48 83 EC ?? 48 8B DA 48 8B F9 E8 ?? ?? ?? ?? 84 C0 75 ?? 48 83 79").Get(), Test2, Test2OG);
     /*if (ABuildingProp_LockDevice::StaticClass())
     {
             auto Fn = ABuildingProp_LockDevice::GetDefaultObj()->GetFunction("UnlockObject");
 
-            Utils::Hook<ABuildingProp_LockDevice>(Fn->GetVTableIndex(), Ohio);
+            Hooking::Hook<ABuildingProp_LockDevice>(Fn->GetVTableIndex(), Ohio);
     }
 
     auto ListenCall = FindListenCall();
@@ -663,11 +648,11 @@ void Misc::Hook()
     {
             auto OverrideFunc = __int64(DefaultObjImpl("FortHUDContext")->GetFunction("EnterCameraMode")->ExecFunction);
 
-            Utils::Hook(OverrideFunc, Listen);
+            Hooking::Hook(OverrideFunc, Listen);
 
             auto NewRel = uint32(OverrideFunc - (ListenCall + 5));
 
-            Utils::Patch<uint32>(ListenCall + 1, NewRel);
+            Hooking::Patch<uint32>(ListenCall + 1, NewRel);
     }*/
 
     if (VersionInfo.FortniteVersion >= 11 && VersionInfo.FortniteVersion < 16)
@@ -687,13 +672,7 @@ void Misc::Hook()
         {
             auto Rel32 = NearGetOverrideCosmeticLoadout.ScanFor({ 0xE8 }).Get();
 
-            auto OverrideFunc = __int64(DefaultObjImpl("FortHUDContext")->GetFunction("EnterCursorMode")->ExecFunction);
-
-            Utils::Hook(OverrideFunc, InitializeCosmeticLoadout);
-
-            auto NewRel = uint32(OverrideFunc - (Rel32 + 5));
-
-            Utils::Patch<uint32>(Rel32 + 1, NewRel);
+            Hooking::Rel32Hook(Rel32 + 1, InitializeCosmeticLoadout);
         }
     }
 }

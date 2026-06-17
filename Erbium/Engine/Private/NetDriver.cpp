@@ -97,8 +97,8 @@ UNetConnection* IsActorOwnedByAndRelevantToConnection(const AActor* Actor, TArra
             bOutHasNullViewTarget = true;
         }
 
-        if (ActorOwner == Conn->PlayerController || (Conn->PlayerController && ActorOwner == Conn->PlayerController->Pawn)
-            || (Conn->ViewTarget && IsRelevancyOwnerFor(Conn->ViewTarget, Actor, ActorOwner, Conn->OwningActor)))
+        if (ActorOwner == Conn->PlayerController || (Conn->PlayerController && ActorOwner == Conn->PlayerController->Pawn) ||
+            (Conn->ViewTarget && IsRelevancyOwnerFor(Conn->ViewTarget, Actor, ActorOwner, Conn->OwningActor)))
         {
             return Conn;
         }
@@ -133,9 +133,8 @@ bool IsLevelInitializedForActor(const UNetDriver* NetDriver, const AActor* InAct
 {
     static bool (*ClientHasInitializedLevelFor)(const UNetConnection*, const UObject*) = decltype(ClientHasInitializedLevelFor)(FindClientHasInitializedLevelFor());
 
-    const bool bCorrectWorld = NetDriver->WorldPackage != nullptr
-        && (!ClientWorldPackageNameOffset || *(FName*)(__int64(InConnection) + ClientWorldPackageNameOffset) == NetDriver->WorldPackage->Name)
-        && (!ClientHasInitializedLevelFor || ClientHasInitializedLevelFor(InConnection, InActor));
+    const bool bCorrectWorld = NetDriver->WorldPackage != nullptr && (!ClientWorldPackageNameOffset || *(FName*)(__int64(InConnection) + ClientWorldPackageNameOffset) == NetDriver->WorldPackage->Name) &&
+                               (!ClientHasInitializedLevelFor || ClientHasInitializedLevelFor(InConnection, InActor));
     const bool bIsConnectionPC = (InActor == InConnection->PlayerController);
     return bCorrectWorld || bIsConnectionPC;
 }
@@ -203,8 +202,8 @@ void ServerReplicateActors(UNetDriver* Driver, float DeltaSeconds)
         }
 
         auto Outer = Actor->Outer;
-        if (Actor->bActorIsBeingDestroyed || (TUObjectArray::GetItemByIndex(Actor->Index)->Flags & ((1 << 29) | (1 << 21))) || Actor->RemoteRole == 0
-            || ((Actor->HasbNetStartup() ? Actor->bNetStartup : false) && Actor->NetDormancy == 4))
+        if (Actor->bActorIsBeingDestroyed || (TUObjectArray::GetItemByIndex(Actor->Index)->Flags & ((1 << 29) | (1 << 21))) || Actor->RemoteRole == 0 ||
+            ((Actor->HasbNetStartup() ? Actor->bNetStartup : false) && Actor->NetDormancy == 4))
         {
             ActorInfo->NextUpdateTime = 43857458734643857485478534.f; // never gonna update lol
             // RemoveNetworkActor(&NetworkObjectList, Actor);
@@ -232,9 +231,7 @@ void ServerReplicateActors(UNetDriver* Driver, float DeltaSeconds)
 
             bool bLevelInitializedForActor = IsLevelInitializedForActor(Driver, Actor, Conn);
             if (!Channel && (!bLevelInitializedForActor || !IsActorRelevantToConnection(Actor, Viewers)))
-            {
                 continue;
-            }
 
             auto PriorityConn = Conn;
             bool bDoCullCheck = true;
@@ -273,8 +270,7 @@ void ServerReplicateActors(UNetDriver* Driver, float DeltaSeconds)
                         ((int32 (*)(UActorChannel*))FindStartBecomingDormant())(Channel);
             }
 
-            bool bIsRelevant = bLevelInitializedForActor && !Actor->bTearOff && (!Channel || Driver->GetTime() - Channel->GetRelevantTime() > 1.0)
-                && IsActorRelevantToConnection(Actor, Viewers);
+            bool bIsRelevant = bLevelInitializedForActor && !Actor->bTearOff && (!Channel || Driver->GetTime() - Channel->GetRelevantTime() > 1.0) && IsActorRelevantToConnection(Actor, Viewers);
             bool bIsRecentlyRelevant = bIsRelevant || (Channel && Driver->GetTime() - Channel->GetRelevantTime() < Driver->RelevantTimeout);
 
             if (bIsRecentlyRelevant && (!Channel || Channel->Actor))
@@ -369,12 +365,8 @@ void ServerReplicateActors(UNetDriver* Driver, float DeltaSeconds)
             {
                 for (auto& NetGUID : DestroyedStartupOrDormantActorGUIDs_UE53)
                 {
-                    auto DestructionInfoPtr = DestroyedStartupOrDormantActors_UE53.Search(
-                        [&](uint64& GUID, FActorDestructionInfo*& InfoUPtr)
-                        {
-                            return GUID
-                                == NetGUID /* && (InfoUPtr->StreamingLevelName == FName(0) || ClientVisibleLevelNames.Contains(InfoUPtr->StreamingLevelName.ComparisonIndex))*/;
-                        });
+                    auto DestructionInfoPtr = DestroyedStartupOrDormantActors_UE53.Search([&](uint64& GUID, FActorDestructionInfo*& InfoUPtr)
+                    { return GUID == NetGUID /* && (InfoUPtr->StreamingLevelName == FName(0) || ClientVisibleLevelNames.Contains(InfoUPtr->StreamingLevelName.ComparisonIndex))*/; });
 
                     if (DestructionInfoPtr)
                     {
@@ -398,12 +390,8 @@ void ServerReplicateActors(UNetDriver* Driver, float DeltaSeconds)
             {
                 for (auto& NetGUID : DestroyedStartupOrDormantActorGUIDs)
                 {
-                    auto DestructionInfoPtr = DestroyedStartupOrDormantActors.Search(
-                        [&](uint32& GUID, FActorDestructionInfo*& InfoUPtr)
-                        {
-                            return GUID
-                                == NetGUID /* && (InfoUPtr->StreamingLevelName == FName(0) || ClientVisibleLevelNames.Contains(InfoUPtr->StreamingLevelName.ComparisonIndex))*/;
-                        });
+                    auto DestructionInfoPtr = DestroyedStartupOrDormantActors.Search([&](uint32& GUID, FActorDestructionInfo*& InfoUPtr)
+                    { return GUID == NetGUID /* && (InfoUPtr->StreamingLevelName == FName(0) || ClientVisibleLevelNames.Contains(InfoUPtr->StreamingLevelName.ComparisonIndex))*/; });
 
                     if (DestructionInfoPtr)
                     {
@@ -507,17 +495,15 @@ void UNetDriver::TickFlush(UNetDriver* Driver, float DeltaSeconds)
     {
         auto Time = (float)UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto GameState = (AFortGameStateAthena*)UWorld::GetWorld()->GameState;
-        static auto bSkipAircraft
-            = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
+        static auto bSkipAircraft = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
         auto GameMode = (AFortGameMode*)UWorld::GetWorld()->AuthorityGameMode;
         if (!bSkipAircraft && GameState->HasWarmupCountdownEndTime() && GameMode->MatchState == FName(L"InProgress") && GameState->WarmupCountdownEndTime <= Time)
         {
             UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"startaircraft"), nullptr);
         }
     }
-    else if (GUI::gsStatus == StartedMatch
-        && (FConfiguration::bAutoRestart || (FConfiguration::WebhookURL && *FConfiguration::WebhookURL)
-            || (VersionInfo.FortniteVersion >= 18 && VersionInfo.FortniteVersion < 25.20)))
+    else if (GUI::gsStatus == StartedMatch &&
+             (FConfiguration::bAutoRestart || (FConfiguration::WebhookURL && *FConfiguration::WebhookURL) || (VersionInfo.FortniteVersion >= 18 && VersionInfo.FortniteVersion < 25.20)))
     {
         auto WorldNetDriver = UWorld::GetWorld()->NetDriver;
         auto GameMode = (AFortGameMode*)UWorld::GetWorld()->AuthorityGameMode;
@@ -542,14 +528,14 @@ void UNetDriver::TickFlush(UNetDriver* Driver, float DeltaSeconds)
                     sprintf_s(version, VersionInfo.FortniteVersion >= 5.00 || VersionInfo.FortniteVersion < 1.2 ? "%.2f" : "%.1f", VersionInfo.FortniteVersion);
 
                     auto Playlist = VersionInfo.FortniteVersion >= 3.5 && GameMode->HasWarmupRequiredPlayerCount()
-                        ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
-                        : nullptr;
-                    auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version
-                        + "\"}, {\"name\":\"Playlist\",\"value\":\"" + (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": "
-                        + "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
-                          "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
-                          "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\""
-                        + iso8601() + "\"}] }";
+                                        ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
+                                        : nullptr;
+                    auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version + "\"}, {\"name\":\"Playlist\",\"value\":\"" +
+                                   (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": " +
+                                   "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
+                                   "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
+                                   "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\"" +
+                                   iso8601() + "\"}] }";
 
                     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 
@@ -601,15 +587,13 @@ void UNetDriver::TickFlush__RepGraph(UNetDriver* Driver, float DeltaSeconds)
             auto Time = (float)UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
             auto GameState = (AFortGameStateAthena*)UWorld::GetWorld()->GameState;
             auto GameMode = (AFortGameMode*)UWorld::GetWorld()->AuthorityGameMode;
-            static auto bSkipAircraft
-                = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
+            static auto bSkipAircraft = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
             if (!bSkipAircraft && GameState->HasWarmupCountdownEndTime() && GameMode->MatchState == FName(L"InProgress") && GameState->WarmupCountdownEndTime <= Time)
             {
                 UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"startaircraft"), nullptr);
             }
         }
-        else if (GUI::gsStatus == StartedMatch
-            && (FConfiguration::bAutoRestart || (FConfiguration::WebhookURL && *FConfiguration::WebhookURL) || VersionInfo.FortniteVersion >= 18))
+        else if (GUI::gsStatus == StartedMatch && (FConfiguration::bAutoRestart || (FConfiguration::WebhookURL && *FConfiguration::WebhookURL) || VersionInfo.FortniteVersion >= 18))
         {
             auto WorldNetDriver = UWorld::GetWorld()->NetDriver;
             auto GameMode = (AFortGameMode*)UWorld::GetWorld()->AuthorityGameMode;
@@ -634,14 +618,14 @@ void UNetDriver::TickFlush__RepGraph(UNetDriver* Driver, float DeltaSeconds)
                         sprintf_s(version, VersionInfo.FortniteVersion >= 5.00 || VersionInfo.FortniteVersion < 1.2 ? "%.2f" : "%.1f", VersionInfo.FortniteVersion);
 
                         auto Playlist = VersionInfo.FortniteVersion >= 3.5 && GameMode->HasWarmupRequiredPlayerCount()
-                            ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
-                            : nullptr;
-                        auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version
-                            + "\"}, {\"name\":\"Playlist\",\"value\":\"" + (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": "
-                            + "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
-                              "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
-                              "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\""
-                            + iso8601() + "\"}] }";
+                                            ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
+                                            : nullptr;
+                        auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version + "\"}, {\"name\":\"Playlist\",\"value\":\"" +
+                                       (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": " +
+                                       "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
+                                       "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
+                                       "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\"" +
+                                       iso8601() + "\"}] }";
 
                         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 
@@ -749,8 +733,7 @@ void UNetDriver::TickFlush__Iris(UNetDriver* Driver, float DeltaSeconds)
         auto Time = (float)UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
         auto GameState = (AFortGameStateAthena*)UWorld::GetWorld()->GameState;
         auto GameMode = (AFortGameMode*)UWorld::GetWorld()->AuthorityGameMode;
-        static auto bSkipAircraft
-            = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
+        static auto bSkipAircraft = GameState->HasCurrentPlaylistInfo() && GameState->CurrentPlaylistInfo.BasePlaylist ? GameState->CurrentPlaylistInfo.BasePlaylist->bSkipAircraft : false;
         if (!bSkipAircraft && GameState->HasWarmupCountdownEndTime() && GameMode->MatchState == FName(L"InProgress") && GameState->WarmupCountdownEndTime <= Time)
         {
             UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"startaircraft"), nullptr);
@@ -781,14 +764,14 @@ void UNetDriver::TickFlush__Iris(UNetDriver* Driver, float DeltaSeconds)
                     sprintf_s(version, VersionInfo.FortniteVersion >= 5.00 || VersionInfo.FortniteVersion < 1.2 ? "%.2f" : "%.1f", VersionInfo.FortniteVersion);
 
                     auto Playlist = VersionInfo.FortniteVersion >= 3.5 && GameMode->HasWarmupRequiredPlayerCount()
-                        ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
-                        : nullptr;
-                    auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version
-                        + "\"}, {\"name\":\"Playlist\",\"value\":\"" + (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": "
-                        + "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
-                          "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
-                          "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\""
-                        + iso8601() + "\"}] }";
+                                        ? (GameMode->GameState->HasCurrentPlaylistInfo() ? GameMode->GameState->CurrentPlaylistInfo.BasePlaylist : GameMode->GameState->CurrentPlaylistData)
+                                        : nullptr;
+                    auto payload = UEAllocatedString("{\"embeds\": [{\"title\": \"Match has ended!\", \"fields\": [{\"name\":\"Version\",\"value\":\"") + version + "\"}, {\"name\":\"Playlist\",\"value\":\"" +
+                                   (Playlist ? Playlist->PlaylistName.ToString() : "Playlist_DefaultSolo") + "\"}], \"color\": " +
+                                   "\"7237230\", \"footer\": {\"text\":\"Erbium\", "
+                                   "\"icon_url\":\"https://cdn.discordapp.com/attachments/1341168629378584698/1436803905119064105/"
+                                   "L0WnFa.png.png?ex=6910ef69&is=690f9de9&hm=01a0888b46647959b38ee58df322048ab49e2a5a678e52d4502d9c5e3978d805&\"}, \"timestamp\":\"" +
+                                   iso8601() + "\"}] }";
 
                     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 
@@ -937,6 +920,8 @@ void UNetDriver::PostLoadHook()
         ClientWorldPackageNameOffset = 0x1818;
     else if (VersionInfo.FortniteVersion >= 24)
         ClientWorldPackageNameOffset = 0x1820;
+    else if (VersionInfo.FortniteVersion >= 21.20)
+        ClientWorldPackageNameOffset = 0x1708;
     else if (VersionInfo.FortniteVersion >= 20.20)
         ClientWorldPackageNameOffset = 0x16b8;
     else if (VersionInfo.FortniteVersion >= 20)
@@ -974,7 +959,7 @@ void UNetDriver::PostLoadHook()
             FindSendClientAdjustment();
             FindUpdateIrisReplicationViews();
             FindPreSendUpdate();
-            Utils::Hook(FindTickFlush(), TickFlush__Iris, TickFlushOG);
+            Hooking::Hook(FindTickFlush(), TickFlush__Iris, TickFlushOG);
             return;
         }
         // cache
@@ -1000,18 +985,18 @@ void UNetDriver::PostLoadHook()
 
         GetActorLocation = (void (*)(AActor*, FFrame&, FVector*))AActor::GetDefaultObj()->GetFunction("K2_GetActorLocation")->GetNativeFunc();
 
-        Utils::Hook(FindTickFlush(), TickFlush, TickFlushOG);
+        Hooking::Hook(FindTickFlush(), TickFlush, TickFlushOG);
     }
     else
     {
         ServerReplicateActors_ = FindServerReplicateActors();
 
-        Utils::Hook(FindTickFlush(), TickFlush__RepGraph, TickFlushOG);
+        Hooking::Hook(FindTickFlush(), TickFlush__RepGraph, TickFlushOG);
     }
 
     if (VersionInfo.FortniteVersion < 3.4 && FindFlushDormancy())
     {
-        Utils::Hook(__int64(AActor::GetDefaultObj()->GetFunction("FlushNetDormancy")->GetImpl()), FlushNetDormancy, FlushNetDormancyOG);
-        Utils::Hook(__int64(AActor::GetDefaultObj()->GetFunction("SetNetDormancy")->GetImpl()), SetNetDormancy, SetNetDormancyOG);
+        Hooking::Hook(__int64(AActor::GetDefaultObj()->GetFunction("FlushNetDormancy")->GetImpl()), FlushNetDormancy, FlushNetDormancyOG);
+        Hooking::Hook(__int64(AActor::GetDefaultObj()->GetFunction("SetNetDormancy")->GetImpl()), SetNetDormancy, SetNetDormancyOG);
     }
 }

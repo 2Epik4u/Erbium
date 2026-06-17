@@ -187,11 +187,9 @@ void OnRep_ReplicatedAttachedInfo(AFortOctopusTowhookAttachableProjectile* _this
 
     printf("[Ballers] Comp: %s, Owner %s\n", Comp->Name.ToString().c_str(), Comp->GetOwner()->Name.ToString().c_str());
     printf("[Ballers] Location: %f %f %f [World] -> ", _this->AttachedInfo.Hit.Location.X, _this->AttachedInfo.Hit.Location.Y, _this->AttachedInfo.Hit.Location.Z);
-    printf("%f %f %f [Local]\n", OwningVehicle->ReplicatedAttachState.LocalLocation.X, OwningVehicle->ReplicatedAttachState.LocalLocation.Y,
-        OwningVehicle->ReplicatedAttachState.LocalLocation.Z);
+    printf("%f %f %f [Local]\n", OwningVehicle->ReplicatedAttachState.LocalLocation.X, OwningVehicle->ReplicatedAttachState.LocalLocation.Y, OwningVehicle->ReplicatedAttachState.LocalLocation.Z);
     printf("[Ballers] Normal: %f %f %f [World] -> ", _this->AttachedInfo.Hit.Normal.X, _this->AttachedInfo.Hit.Normal.Y, _this->AttachedInfo.Hit.Normal.Z);
-    printf("%f %f %f [Local]\n", OwningVehicle->ReplicatedAttachState.LocalNormal.X, OwningVehicle->ReplicatedAttachState.LocalNormal.Y,
-        OwningVehicle->ReplicatedAttachState.LocalNormal.Z);
+    printf("%f %f %f [Local]\n", OwningVehicle->ReplicatedAttachState.LocalNormal.X, OwningVehicle->ReplicatedAttachState.LocalNormal.Y, OwningVehicle->ReplicatedAttachState.LocalNormal.Z);
     // printf("CALLED!!!!\n");
 }
 
@@ -204,15 +202,15 @@ void AFortPhysicsPawn::Hook()
 
         if (ServerMoveFn)
         {
-            Utils::ExecHook(ServerMoveFn, ServerMove);
-            Utils::ExecHook(DefaultPhysPawn->GetFunction("ServerMoveReliable"), ServerMove);
+            Hooking::ExecHook(ServerMoveFn, ServerMove);
+            Hooking::ExecHook(DefaultPhysPawn->GetFunction("ServerMoveReliable"), ServerMove);
         }
         else
         {
             auto ServerUpdatePhysicsParamsFn = DefaultPhysPawn->GetFunction("ServerUpdatePhysicsParams");
 
             if (ServerUpdatePhysicsParamsFn)
-                Utils::ExecHook(ServerUpdatePhysicsParamsFn, ServerMove);
+                Hooking::ExecHook(ServerUpdatePhysicsParamsFn, ServerMove);
         }
     }
     else
@@ -220,20 +218,20 @@ void AFortPhysicsPawn::Hook()
         auto DefaultVehicle = DefaultObjImpl("FortAthenaVehicle");
 
         if (DefaultVehicle)
-            Utils::ExecHook(DefaultVehicle->GetFunction("ServerUpdatePhysicsParams"), ServerMove);
+            Hooking::ExecHook(DefaultVehicle->GetFunction("ServerUpdatePhysicsParams"), ServerMove);
     }
 
     auto DefaultOctopusVehicle = AFortOctopusVehicle::GetDefaultObj();
 
     if (DefaultOctopusVehicle)
     {
-        Utils::ExecHook(DefaultOctopusVehicle->GetFunction("ServerUpdateTowhook"), AFortOctopusVehicle::ServerUpdateTowhook);
+        Hooking::ExecHook(DefaultOctopusVehicle->GetFunction("ServerUpdateTowhook"), AFortOctopusVehicle::ServerUpdateTowhook);
     }
 
     auto DefaultSpaghettiVehicle = AFortSpaghettiVehicle::GetDefaultObj();
 
     if (DefaultSpaghettiVehicle)
-        Utils::ExecHook(DefaultSpaghettiVehicle->GetFunction("ServerUpdateTowhook"), AFortSpaghettiVehicle::ServerUpdateTowhook);
+        Hooking::ExecHook(DefaultSpaghettiVehicle->GetFunction("ServerUpdateTowhook"), AFortSpaghettiVehicle::ServerUpdateTowhook);
 
     if (AFortOctopusTowhookAttachableProjectile::StaticClass())
     {
@@ -262,6 +260,6 @@ void AFortPhysicsPawn::Hook()
         }
         //.ScanFor({ 0x48, 0x8B, 0xFF, 0xE8 }, false, 0, 1, 2048, true).RelativeOffset(4).Get();
 
-        Utils::Hook<AFortOctopusTowhookAttachableProjectile>(OnRep_ReplicatedAttachedInfoIdx, OnRep_ReplicatedAttachedInfo, OnRep_ReplicatedAttachedInfoOG);
+        Hooking::Hook<AFortOctopusTowhookAttachableProjectile>(OnRep_ReplicatedAttachedInfoIdx, OnRep_ReplicatedAttachedInfo, OnRep_ReplicatedAttachedInfoOG);
     }
 }

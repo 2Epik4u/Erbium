@@ -9,7 +9,7 @@ void ABuildingFoundation::SetDynamicFoundationEnabled_(UObject* Context, FFrame&
     bool bEnabled;
     Stack.StepCompiledIn(&bEnabled);
     Stack.IncrementCode();
-    if (Foundation->LevelToStream.ComparisonIndex == 0 && SelectAndSetupMyBuildingLevel_) 
+    if (Foundation->LevelToStream.ComparisonIndex == 0 && SelectAndSetupMyBuildingLevel_)
     {
         auto SelectAndSetupMyBuildingLevel = (bool (*)(ABuildingFoundation*, void*))SelectAndSetupMyBuildingLevel_;
         SelectAndSetupMyBuildingLevel(Foundation, nullptr);
@@ -23,7 +23,7 @@ void ABuildingFoundation::SetDynamicFoundationEnabled_(UObject* Context, FFrame&
     if (Foundation->HasFoundationEnabledState())
         Foundation->FoundationEnabledState = bEnabled ? 1 : 2;
 
-    //if (VersionInfo.FortniteVersion >= 14 and VersionInfo.FortniteVersion < 15)// Idk why, but it is not called on s14 maybe on more szns
+    // if (VersionInfo.FortniteVersion >= 14 and VersionInfo.FortniteVersion < 15)// Idk why, but it is not called on s14 maybe on more szns
     Foundation->SetDynamicFoundationTransform(Foundation->GetTransform());
 }
 
@@ -52,6 +52,6 @@ void ABuildingFoundation::Hook()
 
     SelectAndSetupMyBuildingLevel_ = FindSelectAndSetupMyBuildingLevel();
 
-    Utils::ExecHook(GetDefaultObj()->GetFunction("SetDynamicFoundationEnabled"), SetDynamicFoundationEnabled_);
-    Utils::ExecHook(GetDefaultObj()->GetFunction("SetDynamicFoundationTransform"), SetDynamicFoundationTransform_);
+    Hooking::ExecHook(GetDefaultObj()->GetFunction("SetDynamicFoundationEnabled"), SetDynamicFoundationEnabled_);
+    Hooking::ExecHook(GetDefaultObj()->GetFunction("SetDynamicFoundationTransform"), SetDynamicFoundationTransform_);
 }

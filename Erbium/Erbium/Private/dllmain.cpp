@@ -62,7 +62,7 @@ void Main()
     }
     if (VersionInfo.FortniteVersion == 20.40)
     {
-       UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogSpecialRelevancyHealthComponent None"), nullptr);
+        UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"log LogSpecialRelevancyHealthComponent None"), nullptr);
     }
     if (VersionInfo.EngineVersion >= 5.1)
     {
@@ -127,8 +127,8 @@ void Main()
         // if (SprintCVar)
         //     *SprintCVar = false;
 
-        //if (HurdleCVar)
-        //    *HurdleCVar = false;
+        // if (HurdleCVar)
+        //     *HurdleCVar = false;
 
         if (SlideCVar)
             *SlideCVar = false;
@@ -136,7 +136,7 @@ void Main()
         if (MantleCVar)
             *MantleCVar = false;
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.TacticalSprint 0"), nullptr);
-        //UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Hurdle 0"), nullptr);
+        // UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Hurdle 0"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Sliding 0"), nullptr);
         UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), FString(L"Fort.MME.Clambering 0"), nullptr);
     }
@@ -152,10 +152,9 @@ void Main()
         curl_global_init(CURL_GLOBAL_ALL);
 
     sprintf_s(GUI::windowTitle,
-        VersionInfo.EngineVersion >= 5.0
-            ? "Erbium (FN %.2f, UE %.1f): Setting up"
-            : (VersionInfo.FortniteVersion >= 5.00 || VersionInfo.FortniteVersion < 1.2 ? "Erbium (FN %.2f, UE %.2f): Setting up" : "Erbium (FN %.1f, UE %.2f): Setting up"),
-        VersionInfo.FortniteVersion, VersionInfo.EngineVersion);
+              VersionInfo.EngineVersion >= 5.0 ? "Erbium (FN %.2f, UE %.1f): Setting up"
+                                               : (VersionInfo.FortniteVersion >= 5.00 || VersionInfo.FortniteVersion < 1.2 ? "Erbium (FN %.2f, UE %.2f): Setting up" : "Erbium (FN %.1f, UE %.2f): Setting up"),
+              VersionInfo.FortniteVersion, VersionInfo.EngineVersion);
     SetConsoleTitleA(GUI::windowTitle);
 
     // if constexpr (!FConfiguration::bGUI)
@@ -168,7 +167,7 @@ void Main()
     for (auto& NullFunc : NullFuncs)
         if (NullFunc != 0)
         {
-            Utils::Patch<uint8_t>(NullFunc, 0xc3);
+            Hooking::Patch<uint8_t>(NullFunc, 0xc3);
         }
 
     for (auto& RetTrueFunc : RetTrueFuncs)
@@ -176,20 +175,16 @@ void Main()
         if (RetTrueFunc == 0)
             continue;
 
-        Utils::Patch<uint32_t>(RetTrueFunc, 0xc0ffc031);
-        Utils::Patch<uint8_t>(RetTrueFunc + 4, 0xc3);
+        Hooking::Patch<uint32_t>(RetTrueFunc, 0xc0ffc031);
+        Hooking::Patch<uint8_t>(RetTrueFunc + 4, 0xc3);
     }
 
     auto GameSessionPatch = FindGameSessionPatch();
     if (GameSessionPatch)
-        Utils::Patch<uint8_t>(GameSessionPatch, 0x85);
-
-    MH_Initialize();
+        Hooking::Patch<uint8_t>(GameSessionPatch, 0x85);
 
     for (auto& HookFunc : _HookFuncs)
         HookFunc();
-
-    MH_EnableHook(MH_ALL_HOOKS);
 
     *(bool*)FindGIsClient() = false;
     if (VersionInfo.EngineVersion > 4.20) // 3.6 and below have a crash on ALandscapeProxy
@@ -226,14 +221,12 @@ void Main()
 
     auto EncryptionPatch = FindEncryptionPatch();
     if (EncryptionPatch)
-        Utils::Patch<uint8_t>(EncryptionPatch, 0x74);
+        Hooking::Patch<uint8_t>(EncryptionPatch, 0x74);
     else
         printf("Matchmaking is NOT supported on this version, please make a github issue.\n");
 
     for (auto& HookFunc : _PostLoadHookFuncs)
         HookFunc();
-
-    MH_EnableHook(MH_ALL_HOOKS);
 
     Misc::bHookedAll = true;
 }
